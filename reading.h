@@ -7,8 +7,10 @@ class Reading {
 
     Reading(); // default constructor
     Reading(int temp, char* dt, float h); // parameterized constructor
- 
+    Reading(Reading &cpy);
     ~Reading();
+    
+    Reading & operator=(Reading &cpy);
 
     // getters (assessors) - to get values of the private variables
     const char* getDatetime();

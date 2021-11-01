@@ -34,14 +34,17 @@ const int CAPACITY = 100;
 // defined anywhere in the main.cpp
 // file. 
 
+void deleteList(Reading* list[], int count);
 int getChoice(int lo, int hi);
 int getInt();
 float getFloat();
 int chooseFromMenu();
-void addTemp(Reading list[], int &count);
-void printList(Reading list[], int count);
-void printStats(Reading list[], int count);
-void deleteTemp(Reading list[], int &count);
-void readInFile(Reading list[], int &count);
-void writeOutFile(Reading list[], int count);
+// one way to pass in an array of pointers:
+void addTemp(Reading* list[], int &count);
+// another way
+void printList(Reading** list, int count);
+void printStats(Reading* list[], int count);
+void deleteTemp(Reading* list[], int &count);
+void readInFile(Reading* list[], int &count);
+void writeOutFile(Reading* list[], int count);
  

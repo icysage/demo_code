@@ -9,6 +9,8 @@
  */
 #include "main.h"  // for constants and 
                    // function prototypes
+
+
 /* Purpose: Main function.  Has the menu 
  * loop that runs the program.
  * Parameters: none
@@ -16,7 +18,8 @@
  */
 int main()
 {
-    Reading list[CAPACITY];
+    Reading* list[CAPACITY];
+
     char dt[MAX_CHAR] = "June 15 3PM";
     
     Reading obj(70, dt, .45);
@@ -53,8 +56,21 @@ int main()
 			  default:  cout << "Wrong choice!" << endl;
 		  }
     }
+    //deleteList(list, count);
     
     return 0;
+}
+
+/* Purpose: Delete all the objects in the array
+ *  parameters: list of objects, the count
+ *  return: none
+ */
+void deleteList(Reading* list[], int count)
+{
+    for(int i=0; i<count; i++)
+    {
+        delete list[i];
+    }
 }
 
 
@@ -137,7 +153,9 @@ int chooseFromMenu()
 	cout << "2 - print list" << endl;
 	cout << "3 - delete temp from list" << endl;
 	cout << "4 - print statistics" << endl;
-	cout << "5 - quit program" << endl;
+    cout << "5 - read in from a file" << endl;
+    cout << "6 - write out to a file" << endl;
+	cout << "7 - quit program" << endl;
 	
 	return getChoice(1,7);
 }
@@ -150,24 +168,28 @@ int chooseFromMenu()
  *                     and the count as reference
  * Return:  none
  */
-void addTemp(Reading list[], int &count)
+void addTemp(Reading* list[], int &count)
 {
 	int temp;
     char dt[MAX_CHAR];
+    float hum;
 	// this just adds to end of array
 	// if you want to put the temps in
 	// order, see array example: insert_delete.cpp
 	// for how to do that.
 	cout << "Enter temperature: ";
 	temp = getInt();
-	list[count].setTemp(temp);
+
     // get date time
     cout << "enter date and time: ";
     cin.getline(dt, MAX_CHAR);
-    list[count].setDatetime(dt);
 
     cout << "enter humidity ratio (between 0 and 1): ";
-    list[count].setHumidity(getFloat());
+    hum = getFloat();
+
+    //create memory for new object and pass in values
+    // via the parameterized constructor
+    list[count] = new Reading(temp, dt, hum);
 
 	count++;
 }
@@ -177,7 +199,7 @@ void addTemp(Reading list[], int &count)
  *                     and the count
  * Return:  none
  */
-void printList(Reading list[], int count)
+void printList(Reading** list, int count)
 {
 	if(count == 0)
 	{
@@ -188,9 +210,9 @@ void printList(Reading list[], int count)
 	cout << "=== List ===" << endl;
 	for(int i=0; i < count; i++)
 	{
-		cout << "temp: " << list[i].getTemp() << endl;
-        cout << "Date time: " << list[i].getDatetime() << endl;
-        cout << "Humidity: " << list[i].getHumidity() << endl;
+		cout << "temp: " << list[i]->getTemp() << endl;
+        cout << "Date time: " << list[i]->getDatetime() << endl;
+        cout << "Humidity: " << list[i]->getHumidity() << endl;
 	}
     
 	cout << "=========="<< endl << endl;
@@ -204,20 +226,20 @@ void printList(Reading list[], int count)
  *                     and the count
  * Return:  none
  */
-void printStats(Reading list[], int count)
+void printStats(Reading *list[], int count)
 {
 	if(count == 0)
 	{
 		cout << "=== No Data ===" << endl;
 		return;
 	}
-	int max = list[0].getTemp();
-	int min = list[0].getTemp();
+	int max = list[0]->getTemp();
+	int min = list[0]->getTemp();
 	float sum = 0.0;
 	
 	for(int i=0; i < count; i++)
 	{
-        int temp = list[i].getTemp();
+        int temp = list[i]->getTemp();
 		if(temp > max)
 		{
 			max = temp;
@@ -244,7 +266,7 @@ void printStats(Reading list[], int count)
  *                     and the count as reference
  * Return:  none
  */
-void deleteTemp(Reading list[], int &count)
+void deleteTemp(Reading *list[], int &count)
 {
 	//NOTE: this only deletes the first
 	// element of the temperature in the
@@ -264,12 +286,12 @@ void deleteTemp(Reading list[], int &count)
 	
 	for(int i=0; i < count; i++)
 	{
-		if(list[i].getTemp() == del)
+		if(list[i]->getTemp() == del)
 		{
 			// move over to the left
               for(int j = i+1; j < count; j++)
               {
-				  list[j-1] = list[j];
+				 *list[j-1] = *list[j];
 			  }
 			  // decrement the count
 			  count--;
@@ -279,7 +301,7 @@ void deleteTemp(Reading list[], int &count)
 	  cout << "Cannot find this temperature" << endl; 			
 }
 
-void readInFile(Reading list[], int& count)
+void readInFile(Reading* list[], int& count)
 {
   ifstream infile;
   char filename[MAX_CHAR];
@@ -300,11 +322,11 @@ void readInFile(Reading list[], int& count)
   
   while( infile.getline(dt, MAX_CHAR))
   {
-       list[count].setDatetime(dt);
+       list[count]->setDatetime(dt);
        infile >> temp; 
-       list[count].setTemp(temp);
+       list[count]->setTemp(temp);
        infile >> hum;
-       list[count].setHumidity(hum);
+       list[count]->setHumidity(hum);
        infile.ignore(100,'\n');
        count++;
   }
@@ -313,7 +335,7 @@ void readInFile(Reading list[], int& count)
      
 }
 
-void writeOutFile(Reading list[], int count)
+void writeOutFile(Reading* list[], int count)
 {
    ofstream outfile;
    char filename[MAX_CHAR];
@@ -329,9 +351,9 @@ void writeOutFile(Reading list[], int count)
    }
    for(int i=0; i<count; i++)
    {
-      outfile << list[i].getDatetime() << endl;
-      outfile << list[i].getTemp() << endl;
-      outfile << list[i].getHumidity() << endl;
+      outfile << list[i]->getDatetime() << endl;
+      outfile << list[i]->getTemp() << endl;
+      outfile << list[i]->getHumidity() << endl;
    }
 
    outfile.close();

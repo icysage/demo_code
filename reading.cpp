@@ -19,10 +19,32 @@ Reading::Reading(int t, char* dt, float h)
 {
     temp = t;
     int size = strlen(dt)+1;
-    //datetime = new char[size];
-    datetime = NULL;
+    datetime = new char[size];
     strcpy(datetime, dt);
     humidity = h;
+}
+
+Reading::Reading(Reading &cpy)
+{
+   this->temp = cpy.temp;
+   int size = strlen(cpy.datetime) + 1;
+   this->datetime = new char[size];
+   strcpy(this->datetime, cpy.datetime);
+   this->humidity = cpy.humidity;
+}
+
+Reading & Reading::operator=(Reading &cpy)
+{
+   if(this != &cpy)
+   {
+      this->temp = cpy.temp;
+      delete this->datetime;
+      int size = strlen(cpy.datetime) + 1;
+      this->datetime = new char[size];
+      strcpy(this->datetime, cpy.datetime);
+      this->humidity = cpy.humidity;
+   }
+   return *this;
 }
 
 Reading::~Reading()
