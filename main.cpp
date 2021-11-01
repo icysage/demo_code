@@ -17,6 +17,10 @@
 int main()
 {
     Reading list[CAPACITY];
+    char dt[MAX_CHAR] = "June 15 3PM";
+    
+    Reading obj(70, dt, .45);
+
 	int count = 0;
 	bool cont = true;
 	int choice = -1;

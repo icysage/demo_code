@@ -4,6 +4,12 @@
 const int MAX_CHAR = 200;
 class Reading {
   public:
+
+    Reading(); // default constructor
+    Reading(int temp, char* dt, float h); // parameterized constructor
+ 
+    ~Reading();
+
     // getters (assessors) - to get values of the private variables
     const char* getDatetime();
     int getTemp();
@@ -16,7 +22,7 @@ class Reading {
     
   private:
     int temp;
-    char datetime[MAX_CHAR];
+    char* datetime;
     float humidity; 
 };
 
