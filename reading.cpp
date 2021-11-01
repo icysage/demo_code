@@ -19,7 +19,8 @@ Reading::Reading(int t, char* dt, float h)
 {
     temp = t;
     int size = strlen(dt)+1;
-    datetime = new char[size];
+    //datetime = new char[size];
+    datetime = NULL;
     strcpy(datetime, dt);
     humidity = h;
 }
