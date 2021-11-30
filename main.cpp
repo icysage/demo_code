@@ -7,6 +7,8 @@
  * delete and print stats on temperature
  * data.
  */
+
+// THIS HAS CHANGED
 #include "main.h"  // for constants and 
                    // function prototypes
 #include "list.h"
