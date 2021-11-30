@@ -7,8 +7,91 @@ using namespace std;
 
 List::List()
 {
-    count = 0;
+   head = NULL;
+   tail = NULL;
 }
+
+void List::addToList(Reading* data)
+{
+   // create a node and set data field
+   Node* newNode = new Node;
+   newNode->data = data;
+   newNode->next = NULL;
+
+/*   // backwards
+   // insert in front
+   newNode->next = head;
+   head = newNode; 
+*/
+
+/*   // forwards
+   // insert in back
+   
+   if(!head) // list is empty
+   {
+       head = tail = newNode;
+   }
+   else // list is not empty
+   {
+       tail->next = newNode;
+       tail = newNode;
+   }
+*/
+
+   // insert in ordered.
+
+   // list is empty
+   if(!head) // head == NULL
+   {
+        head = newNode;
+        return;
+   } 
+   // new node's temp
+   int temp = data->getTemp();
+
+   // insert at the beginning
+   if(temp < head->data->getTemp())
+   {
+       // insert in front
+       newNode->next = head;
+       head = newNode;
+       return;
+   }
+
+   // inserting in the middle/end
+
+   Node* current = head;
+   Node* prev = NULL;
+
+  //  prev -> current
+  //  prev -> newNode -> current
+
+   while(current)
+   {
+      if(current->data->getTemp() > temp)
+      {
+         break;
+      }
+      prev = current;
+      current = current->next;
+   }
+   newNode->next = current;
+   prev->next = newNode;
+
+}
+
+List::~List()
+{
+    while(head) // head != NULL
+    {
+       Node* temp = head;
+       head = head->next; 
+       delete temp->data;
+       delete temp;
+    }
+
+}
+
 
 /* Purpose: Ask user for int type value. Checks for valid int before returning
  * the value.
@@ -86,11 +169,9 @@ void List::addTemp()
 
     //create memory for new object and pass in values
     // via the parameterized constructor
-    list[count].setTemp(temp);
-    list[count].setDatetime(dt);
-    list[count].setHumidity(hum);
-
-	count++;
+    Reading* data = new Reading(temp,dt,hum);
+    addToList(data);
+    
 }
 
 /* Purpose: Prints the list of temperatures.
@@ -100,18 +181,21 @@ void List::addTemp()
  */
 void List::printList()
 {
-	if(count == 0)
+	if(!head) // head is NULL
 	{
 		cout << "=== The List is Empty ===" << endl;
 		return;
 	}
     
 	cout << "=== List ===" << endl;
-	for(int i=0; i < count; i++)
+    Node* current = head;
+
+	while(current) // current != NULL
 	{
-		cout << "temp: " << list[i].getTemp() << endl;
-        cout << "Date time: " << list[i].getDatetime() << endl;
-        cout << "Humidity: " << list[i].getHumidity() << endl;
+		cout << "temp: " << current->data->getTemp() << endl;
+        cout << "Date time: " << current->data->getDatetime() << endl;
+        cout << "Humidity: " << current->data->getHumidity() << endl;
+        current = current->next;
 	}
     
 	cout << "=========="<< endl << endl;
@@ -127,18 +211,18 @@ void List::printList()
  */
 void List::printStats()
 {
-	if(count == 0)
+	if(!head) // head is NULL
 	{
 		cout << "=== No Data ===" << endl;
 		return;
 	}
-	int max = list[0].getTemp();
-	int min = list[0].getTemp();
+	int max = head->data->getTemp();
+	int min = head->data->getTemp();
 	float sum = 0.0;
-	
-	for(int i=0; i < count; i++)
+	int count = 0;
+	for(Node* current=head; current; current = current->next)
 	{
-        int temp = list[i].getTemp();
+        int temp = current->data->getTemp();
 		if(temp > max)
 		{
 			max = temp;
@@ -148,6 +232,7 @@ void List::printStats()
 			min = temp;
 		}
 		sum += temp;
+        count++;
 	}
 	
 	cout << "=== Statistics ===" << endl;
@@ -173,31 +258,48 @@ void List::deleteTemp()
 	// figure out how to delete all elements
 	// of the given temperature
 	
-	if(count == 0) // nothing to delete.
+	if(!head) // head is NULL
 	{
 		cout <<  "=== No Data ===" << endl;
 		return;
 	}
+
 	int del = 0;
 	printList();
 	cout << "What temperature to delete? ";
 	del = getInt();
 	
-	for(int i=0; i < count; i++)
+    // delete the first node. 
+    if(del == head->data->getTemp())
+    {
+        Node* temp = head->next; // second node
+        delete head->data;
+        delete head;
+        head = temp; // second becomes the first node
+        return;
+    }
+ 
+    // delete in the middle (or at the end)
+    Node* current = head->next;
+    Node* prev = head;
+
+	while(current) // current is not NULL
 	{
-		if(list[i].getTemp() == del)
+		if(current->data->getTemp() == del)
 		{
-			// move over to the left
-              for(int j = i+1; j < count; j++)
-              {
-				 list[j-1] = list[j];
-			  }
-			  // decrement the count
-			  count--;
-			  return; 
-		  }
-	  }
-	  cout << "Cannot find this temperature" << endl; 			
+			// tie around the node
+            // prev/next -> current/next 
+             prev->next = current->next;
+             delete current->data;
+             delete current;
+			 //return; // for one temp
+             current = prev;  //for more than one temp 
+		}
+        prev = current;
+        current = current->next;
+	}
+	cout << "Cannot find this temperature" << endl;
+	
 }
 
 void List::readInFile()
@@ -221,13 +323,13 @@ void List::readInFile()
   
   while( infile.getline(dt, MAX_CHAR))
   {
-       list[count].setDatetime(dt);
        infile >> temp; 
-       list[count].setTemp(temp);
        infile >> hum;
-       list[count].setHumidity(hum);
        infile.ignore(100,'\n');
-       count++;
+       
+       Reading* data = new Reading(temp, dt, hum);
+
+       addToList(data);   
   }
 
   infile.close();
@@ -248,11 +350,13 @@ void List::writeOutFile()
        cout << "file can't be opened" << endl;
        return;
    }
-   for(int i=0; i<count; i++)
+   Node* current = head;
+   while(current)
    {
-      outfile << list[i].getDatetime() << endl;
-      outfile << list[i].getTemp() << endl;
-      outfile << list[i].getHumidity() << endl;
+      outfile << current->data->getDatetime() << endl;
+      outfile << current->data->getTemp() << endl;
+      outfile << current->data->getHumidity() << endl;
+      current = current->next;
    }
 
    outfile.close();

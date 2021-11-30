@@ -7,9 +7,11 @@
 
 const int CAP = 100;
 
+
 class List {
    public:
        List();
+       ~List();
 
        // tasks 
        void addTemp();
@@ -21,10 +23,17 @@ class List {
  
 
    private:
-      Reading list[CAP];
-      int count;
+      //Reading list[CAP];
+      //int count;
+      struct Node {
+         Reading* data;
+         Node* next;
+      };
+      Node* head;
+      Node* tail; // for forwards insert ONLY
 
       // utilities
+      void addToList(Reading* data);
       int getInt();
       float getFloat();
 
